@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database Status</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .status-card { background: #f5f5f5; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .count { font-size: 2em; font-weight: bold; color: #0070f3; }
+        .samples { background: white; border: 1px solid #ddd; border-radius: 4px; padding: 15px; margin: 10px 0; }
+        .sample-item { padding: 10px; border-bottom: 1px solid #eee; }
+        .sample-item:last-child { border-bottom: none; }
+        .refresh-btn { background: #0070f3; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+        .refresh-btn:hover { background: #0051cc; }
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Database Status</h1>
+    <button class="refresh-btn" onclick="checkDatabase()">Refresh Status</button>
+    <div id="status"></div>
+
+    <script>
+        async function checkDatabase() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<p>Loading database status...</p>';
+            
+            try {
+                const response = await fetch('/api/check-data-demo');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const { counts, leadsByStatus, samples } = data.data;
+                    
+                    statusDiv.innerHTML = `
+                        <div class="status-grid">
+                            <div class="status-card">
+                                <h3>📋 Campaigns</h3>
+                                <div class="count">${counts.campaigns}</div>
+                                <p>Total campaigns in database</p>
+                            </div>
+                            
+                            <div class="status-card">
+                                <h3>👥 Leads</h3>
+                                <div class="count">${counts.leads}</div>
+                                <p>Total leads in database</p>
+                            </div>
+                        </div>
+                        
+                        <div class="status-card">
+                            <h3>📊 Leads by Status</h3>
+                            ${leadsByStatus.map(status => `
+                                <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                                    <span>${status.status}:</span>
+                                    <strong>${status.count}</strong>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="status-grid">
+                            <div class="status-card">
+                                <h3>📋 Sample Campaigns</h3>
+                                <div class="samples">
+                                    ${samples.campaigns.map(campaign => `
+                                        <div class="sample-item">
+                                            <strong>${campaign.name}</strong><br>
+                                            <small>Status: ${campaign.status} | Created: ${new Date(campaign.createdAt).toLocaleDateString()}</small>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            
+                            <div class="status-card">
+                                <h3>👥 Sample Leads</h3>
+                                <div class="samples">
+                                    ${samples.leads.map(lead => `
+                                        <div class="sample-item">
+                                            <strong>${lead.firstName} ${lead.lastName}</strong><br>
+                                            <small>${lead.position} at ${lead.company}</small><br>
+                                            <small>Status: ${lead.status} | Email: ${lead.email}</small>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status-card" style="background: #f8d7da; color: #721c24;">
+                            <h3>❌ Error</h3>
+                            <p>Failed to check database: ${data.error}</p>
+                            ${data.details ? `<p><small>${data.details}</small></p>` : ''}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="status-card" style="background: #f8d7da; color: #721c24;">
+                        <h3>❌ Network Error</h3>
+                        <p>Failed to connect to API: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load status on page load
+        checkDatabase();
+    </script>
+</body>
+</html>

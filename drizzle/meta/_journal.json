@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1757158265788,
+      "tag": "0000_sticky_bruce_banner",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1757158574344,
+      "tag": "0001_moaning_ender_wiggin",
+      "breakpoints": true
+    }
+  ]
+}
