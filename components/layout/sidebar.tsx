@@ -18,6 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   User,
+  Activity,
+  FileText,
 } from 'lucide-react'
 import { signOut, useSession } from '@/lib/auth-client'
 
@@ -31,6 +33,11 @@ const navigation = [
 
 const settings = [
   { name: 'Settings & Billing', href: '/dashboard/settings', icon: Settings },
+]
+
+const adminPanel = [
+  { name: 'Activity logs', href: '/dashboard/admin/activity-logs', icon: Activity },
+  { name: 'User logs', href: '/dashboard/admin/user-logs', icon: FileText },
 ]
 
 interface SidebarProps {
@@ -153,6 +160,40 @@ export default function Sidebar({ children }: SidebarProps) {
               </div>
             )}
             {settings.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                    isActive
+                      ? "bg-blue-50 text-blue-700"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                    sidebarCollapsed && "justify-center"
+                  )}
+                  title={sidebarCollapsed ? item.name : undefined}
+                >
+                  <item.icon
+                    className={cn(
+                      "h-5 w-5",
+                      isActive ? "text-blue-700" : "text-gray-400",
+                      !sidebarCollapsed && "mr-3"
+                    )}
+                  />
+                  {!sidebarCollapsed && item.name}
+                </Link>
+              )
+            })}
+          </div>
+
+          <div className="space-y-1 pt-4">
+            {!sidebarCollapsed && (
+              <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Admin Panel
+              </div>
+            )}
+            {adminPanel.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link

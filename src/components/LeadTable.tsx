@@ -5,26 +5,47 @@ import { Loader2 } from 'lucide-react'
 import { useInfiniteLeads } from '@/src/hooks/useInfiniteLeads'
 import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { useUIStore } from '@/stores/uiStore'
 import type { Lead } from '@/src/lib/api/leads'
 
-const LeadRow = React.memo(({ lead }: { lead: Lead }) => (
-  <TableRow className="hover:bg-gray-50" tabIndex={0}>
-    <TableCell className="font-medium">
-      {lead.firstName} {lead.lastName}
-    </TableCell>
-    <TableCell>{lead.campaign}</TableCell>
-    <TableCell>{lead.lastContacted ? new Date(lead.lastContacted).toLocaleDateString() : '-'}</TableCell>
-    <TableCell>
-      <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-        lead.status === 'active' ? 'bg-green-100 text-green-800' :
-        lead.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-        'bg-gray-100 text-gray-800'
-      }`}>
-        {lead.status}
-      </span>
-    </TableCell>
-  </TableRow>
-))
+const LeadRow = React.memo(({ lead }: { lead: Lead }) => {
+  const openLeadSheet = useUIStore(state => state.openLeadSheet)
+  
+  const handleRowClick = useCallback(() => {
+    openLeadSheet(parseInt(lead.id))
+  }, [lead.id, openLeadSheet])
+
+  return (
+    <TableRow 
+      className="hover:bg-gray-50 cursor-pointer transition-colors" 
+      tabIndex={0}
+      onClick={handleRowClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleRowClick()
+        }
+      }}
+    >
+      <TableCell className="font-medium">
+        {lead.firstName} {lead.lastName}
+      </TableCell>
+      <TableCell>{lead.campaign}</TableCell>
+      <TableCell>{lead.lastContacted ? new Date(lead.lastContacted).toLocaleDateString() : '-'}</TableCell>
+      <TableCell>
+        <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
+          lead.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+          lead.status === 'contacted' ? 'bg-blue-100 text-blue-800' :
+          lead.status === 'responded' ? 'bg-green-100 text-green-800' :
+          lead.status === 'converted' ? 'bg-purple-100 text-purple-800' :
+          'bg-gray-100 text-gray-800'
+        }`}>
+          {lead.status}
+        </span>
+      </TableCell>
+    </TableRow>
+  )
+})
 
 const SkeletonRow = React.memo(() => (
   <TableRow>
@@ -73,6 +94,7 @@ export function LeadTable() {
     const observer = new IntersectionObserver(handleIntersection, {
       threshold: 0.1,
       rootMargin: '50px',
+      root: sentinel.closest('.overflow-auto') // Use the scroll container as root
     })
 
     observer.observe(sentinel)
@@ -81,7 +103,7 @@ export function LeadTable() {
 
   if (isLoading) {
     return (
-      <div className="h-full overflow-auto scroll-area" tabIndex={0}>
+      <div className="h-full">
         <Table>
           <TableHeader className="sticky top-0 bg-white z-10">
             <TableRow>
@@ -121,7 +143,7 @@ export function LeadTable() {
   }
 
   return (
-    <div className="h-full overflow-auto scroll-area" tabIndex={0}>
+    <div className="h-full">
       <Table>
         <TableHeader className="sticky top-0 bg-white z-10">
           <TableRow>

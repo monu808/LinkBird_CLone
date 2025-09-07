@@ -49,7 +49,7 @@ class ApiClient {
     },
 
     get: async (id: number): Promise<Lead> => {
-      return this.makeRequest<Lead>(`/leads/${id}`)
+      return this.makeRequest<Lead>(`/leads-demo/${id}`)
     },
 
     create: async (data: CreateLeadRequest): Promise<Lead> => {

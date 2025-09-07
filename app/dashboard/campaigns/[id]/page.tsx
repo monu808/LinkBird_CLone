@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
+import { SegmentTabs } from '@/src/components/SegmentTabs'
+import { PlaceholderCard } from '@/src/components/PlaceholderCard'
 import { 
   Settings, 
   Users, 
@@ -76,9 +77,16 @@ export default function CampaignDetailsPage() {
     }
   }
 
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: <BarChart3 className="h-4 w-4" /> },
+    { id: 'leads', label: 'Leads', icon: <Users className="h-4 w-4" /> },
+    { id: 'sequence', label: 'Sequence', icon: <Calendar className="h-4 w-4" /> },
+    { id: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> }
+  ]
+
   if (loading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="max-w-[1200px] mx-auto space-y-6 px-6">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           <span className="ml-2 text-gray-600">Loading campaign...</span>
@@ -89,7 +97,7 @@ export default function CampaignDetailsPage() {
 
   if (error || !campaign) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="max-w-[1200px] mx-auto space-y-6 px-6">
         <Card className="p-8 text-center">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             {error ? 'Error loading campaign' : 'Campaign not found'}
@@ -106,9 +114,9 @@ export default function CampaignDetailsPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="max-w-[1200px] mx-auto space-y-6 px-6">
       {/* Breadcrumb */}
-      <div className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
+      <div className="pt-6 pb-4 flex items-center space-x-2 text-sm text-gray-600">
         <button
           onClick={() => router.push('/dashboard/campaigns')}
           className="flex items-center hover:text-gray-900 transition-colors"
@@ -120,12 +128,12 @@ export default function CampaignDetailsPage() {
         <span className="text-gray-900 font-medium">{campaign.name}</span>
       </div>
 
-      {/* Campaign Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      {/* Campaign Header Card */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{campaign.name}</h1>
-            <p className="text-gray-600">Campaign created on {new Date(campaign.createdAt).toLocaleDateString()}</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">{campaign.name}</h1>
+            <p className="text-sm text-gray-600">Campaign created on {new Date(campaign.createdAt).toLocaleDateString()}</p>
           </div>
           <Badge variant={campaign.status === 'active' ? 'default' : 'secondary'}>
             {campaign.status}
@@ -133,83 +141,98 @@ export default function CampaignDetailsPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-4 gap-6 mb-6">
-          <div className="bg-blue-50 rounded-lg p-6 text-center">
-            <div className="flex items-center justify-center mb-3">
-              <Users className="h-6 w-6 text-blue-500 mr-2" />
-              <span className="text-sm font-medium text-gray-600">Total Leads</span>
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="bg-blue-50 rounded-md p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <Users className="h-5 w-5 text-blue-500 mr-2" />
+              <span className="text-xs font-medium text-gray-600">Total Leads</span>
             </div>
-            <div className="text-3xl font-bold text-gray-900">{campaign.totalLeads}</div>
+            <div className="text-2xl font-bold text-gray-900">{campaign.totalLeads}</div>
           </div>
           
-          <div className="bg-gray-50 rounded-lg p-6 text-center">
-            <div className="flex items-center justify-center mb-3">
-              <Mail className="h-6 w-6 text-blue-500 mr-2" />
-              <span className="text-sm font-medium text-gray-600">Contacted</span>
+          <div className="bg-gray-50 rounded-md p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <Mail className="h-5 w-5 text-blue-500 mr-2" />
+              <span className="text-xs font-medium text-gray-600">Contacted</span>
             </div>
-            <div className="text-3xl font-bold text-gray-900">{campaign.stats?.contacted || 0}</div>
+            <div className="text-2xl font-bold text-gray-900">{campaign.stats?.contacted || 0}</div>
           </div>
           
-          <div className="bg-gray-50 rounded-lg p-6 text-center">
-            <div className="flex items-center justify-center mb-3">
-              <CheckCircle className="h-6 w-6 text-blue-500 mr-2" />
-              <span className="text-sm font-medium text-gray-600">Converted</span>
+          <div className="bg-gray-50 rounded-md p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+              <span className="text-xs font-medium text-gray-600">Converted</span>
             </div>
-            <div className="text-3xl font-bold text-gray-900">{campaign.stats?.converted || 0}</div>
+            <div className="text-2xl font-bold text-gray-900">{campaign.stats?.converted || 0}</div>
           </div>
           
-          <div className="bg-gray-50 rounded-lg p-6 text-center">
-            <div className="flex items-center justify-center mb-3">
-              <MessageSquare className="h-6 w-6 text-blue-500 mr-2" />
-              <span className="text-sm font-medium text-gray-600">Replies</span>
+          <div className="bg-gray-50 rounded-md p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <MessageSquare className="h-5 w-5 text-purple-500 mr-2" />
+              <span className="text-xs font-medium text-gray-600">Replies</span>
             </div>
-            <div className="text-3xl font-bold text-gray-900">{campaign.stats?.responded || 0}</div>
+            <div className="text-2xl font-bold text-gray-900">{campaign.stats?.responded || 0}</div>
           </div>
         </div>
 
-        {/* Tabs Navigation */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 bg-gray-100 p-1">
-            <TabsTrigger 
-              value="overview" 
-              className="flex items-center space-x-2 py-3 px-6 data-[state=active]:bg-white data-[state=active]:shadow-sm"
-            >
-              <BarChart3 className="h-4 w-4" />
-              <span>Overview</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="leads" 
-              className="flex items-center space-x-2 py-3 px-6 data-[state=active]:bg-white data-[state=active]:shadow-sm"
-            >
-              <Users className="h-4 w-4" />
-              <span>Leads</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="sequence" 
-              className="flex items-center space-x-2 py-3 px-6 data-[state=active]:bg-white data-[state=active]:shadow-sm"
-            >
-              <Calendar className="h-4 w-4" />
-              <span>Sequence</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="settings" 
-              className="flex items-center space-x-2 py-3 px-6 data-[state=active]:bg-white data-[state=active]:shadow-sm"
-            >
-              <Settings className="h-4 w-4" />
-              <span>Settings</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Segmented Tabs */}
+        <div className="mt-4">
+          <SegmentTabs 
+            tabs={tabs}
+            value={activeTab}
+            onValueChange={setActiveTab}
+          />
+        </div>
       </div>
 
-      {/* Tab Content */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsContent value="overview" className="p-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="p-6">
+      {/* Content Container */}
+      <div className="bg-white rounded-xl shadow p-6 -mt-2">
+        {activeTab === 'overview' && (
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Campaign Overview</h3>
+              <p className="text-sm text-gray-600">Campaign performance and analytics</p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'leads' && (
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Campaign Leads</h3>
+              <p className="text-sm text-gray-600">Total leads: {campaign.totalLeads}</p>
+            </div>
+            <Button>Save</Button>
+          </div>
+        )}
+
+        {activeTab === 'sequence' && (
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Message Sequence</h3>
+              <p className="text-sm text-gray-600">Configure your outreach sequence</p>
+            </div>
+            <Button>Save</Button>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Campaign Settings</h3>
+              <p className="text-sm text-gray-600">Configure campaign parameters</p>
+            </div>
+            <Button>Save</Button>
+          </div>
+        )}
+
+        {/* Content Area with Internal Scrolling */}
+        <div className="h-[calc(100vh-320px)] overflow-auto rounded-md" aria-label="Content container">
+          {activeTab === 'overview' && (
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Progress</h3>
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-gray-600">Leads Contacted</span>
@@ -263,25 +286,25 @@ export default function CampaignDetailsPage() {
                 </div>
               </Card>
               
-              <Card className="p-6">
+              <Card className="p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Details</h3>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="flex items-center">
-                    <Calendar className="h-5 w-5 text-gray-400 mr-3" />
+                    <Calendar className="h-4 w-4 text-gray-400 mr-3" />
                     <span className="text-sm text-gray-600">Created:</span>
                     <span className="ml-2 text-sm font-medium text-gray-900">
                       {new Date(campaign.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   <div className="flex items-center">
-                    <BarChart3 className="h-5 w-5 text-gray-400 mr-3" />
+                    <BarChart3 className="h-4 w-4 text-gray-400 mr-3" />
                     <span className="text-sm text-gray-600">Status:</span>
                     <Badge className="ml-2" variant={campaign.status === 'active' ? 'default' : 'secondary'}>
                       {campaign.status}
                     </Badge>
                   </div>
                   <div className="flex items-center">
-                    <TrendingUp className="h-5 w-5 text-gray-400 mr-3" />
+                    <TrendingUp className="h-4 w-4 text-gray-400 mr-3" />
                     <span className="text-sm text-gray-600">Response Rate:</span>
                     <span className="ml-2 text-sm font-medium text-gray-900">
                       {(campaign.stats?.contacted || 0) > 0 ? Math.round(((campaign.stats?.responded || 0) / campaign.stats.contacted) * 100) : 0}%
@@ -290,30 +313,35 @@ export default function CampaignDetailsPage() {
                 </div>
               </Card>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="leads" className="p-6">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Leads</h3>
-              <p className="text-gray-600">Total leads: {campaign.leads}</p>
-              <p className="text-gray-600 mt-2">Lead management functionality will be implemented here.</p>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="sequence" className="p-6">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Message Sequence</h3>
-              <p className="text-gray-600">Campaign sequence management will be implemented here.</p>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="settings" className="p-6">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Settings</h3>
-              <p className="text-gray-600">Campaign configuration options will be implemented here.</p>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          )}
+
+          {activeTab === 'leads' && (
+            <PlaceholderCard 
+              title="Campaign Leads"
+              description="Lead management functionality will be implemented here."
+              statusText="Coming Soon"
+              statusColor="blue"
+            />
+          )}
+
+          {activeTab === 'sequence' && (
+            <PlaceholderCard 
+              title="Message Sequence"
+              description="Campaign sequence management will be implemented here."
+              statusText="In Development"
+              statusColor="yellow"
+            />
+          )}
+
+          {activeTab === 'settings' && (
+            <PlaceholderCard 
+              title="Campaign Settings"
+              description="Campaign configuration options will be implemented here."
+              statusText="Available"
+              statusColor="green"
+            />
+          )}
+        </div>
       </div>
     </div>
   )
