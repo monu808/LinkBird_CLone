@@ -17,6 +17,8 @@ const querySchema = z.object({
 // GET /api/leads-demo - List leads without authentication for demo
 export async function GET(request: NextRequest) {
   try {
+    console.log('Demo leads API called')
+    
     const { searchParams } = new URL(request.url)
     const params = querySchema.parse(Object.fromEntries(searchParams))
     
@@ -24,11 +26,11 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(params.limit)
     const offset = (page - 1) * limit
 
-    // Use demo user ID
-    const demoUserId = 'demo_user_123'
+    // Use the actual user ID from our seeded data
+    const userId = '1'
 
     // Build where conditions
-    const conditions = [eq(leads.userId, demoUserId)]
+    const conditions = [eq(leads.userId, userId)]
     
     if (params.search) {
       conditions.push(

@@ -1,8 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useInfiniteCampaigns } from '@/src/hooks/useCampaigns'
-import { useUIStore } from '@/src/stores/uiStore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,14 +30,17 @@ interface CampaignCardProps {
 }
 
 const CampaignCard = ({ campaign }: CampaignCardProps) => {
-  const { openCampaignSheet } = useUIStore()
+  const router = useRouter()
   
   const progressPercentage = campaign.totalLeads > 0 
     ? Math.round((campaign.sentCount / campaign.totalLeads) * 100) 
     : 0
 
-  const handleCardClick = () => {
-    openCampaignSheet(campaign.id)
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    console.log('Campaign card clicked!', campaign.id, campaign.name)
+    console.log('Navigating to:', `/dashboard/campaigns/${campaign.id}`)
+    router.push(`/dashboard/campaigns/${campaign.id}`)
   }
 
   return (

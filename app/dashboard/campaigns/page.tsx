@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -16,54 +18,98 @@ import {
   MoreHorizontal,
   Play,
   Pause,
-  Eye
+  Eye,
+  Loader2
 } from 'lucide-react'
 
-// Mock campaigns data
-const mockCampaigns = [
-  {
-    id: 1,
-    name: 'Product Manager Outreach Q4',
-    leads: 245,
-    connections: 89,
-    replies: 23,
-    progress: 78,
-    status: 'active',
-    lastActivity: 'Jan 6, 05:00 PM'
-  },
-  {
-    id: 2,
-    name: 'Engineering Leaders Campaign',
-    leads: 180,
-    connections: 65,
-    replies: 18,
-    progress: 65,
-    status: 'active',
-    lastActivity: 'Jan 6, 02:45 PM'
-  },
-  {
-    id: 3,
-    name: 'Startup Founders Network',
-    leads: 320,
-    connections: 156,
-    replies: 45,
-    progress: 92,
-    status: 'paused',
-    lastActivity: 'Jan 5, 09:50 PM'
-  },
-  {
-    id: 4,
-    name: 'Sales Leaders Q1',
-    leads: 0,
-    connections: 0,
-    replies: 0,
-    progress: 0,
-    status: 'draft',
-    lastActivity: 'Jan 7, 07:40 PM'
+interface Campaign {
+  id: number
+  name: string
+  status: string
+  userId: string
+  startDate: string
+  createdAt: string
+  updatedAt: string
+  totalLeads: number
+  stats: {
+    contacted: number
+    responded: number
+    converted: number
   }
-]
+}
+
+// Helper function for status badges
+const getStatusBadge = (status: string) => {
+  const statusConfig = {
+    active: { color: 'bg-green-100 text-green-800', label: 'Active' },
+    paused: { color: 'bg-yellow-100 text-yellow-800', label: 'Paused' },
+    draft: { color: 'bg-gray-100 text-gray-800', label: 'Draft' },
+    inactive: { color: 'bg-red-100 text-red-800', label: 'Inactive' }
+  }
+  
+  const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft
+  
+  return (
+    <Badge className={`${config.color} border-0`}>
+      {config.label}
+    </Badge>
+  )
+}
 
 export default function CampaignsPage() {
+  const router = useRouter()
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch campaigns from API
+  useEffect(() => {
+    fetchCampaigns()
+  }, [])
+
+  const fetchCampaigns = async () => {
+    try {
+      setLoading(true)
+      console.log('Fetching campaigns from demo API...')
+      const response = await fetch('/api/campaigns/demo')
+      console.log('Response status:', response.status)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('API Error:', errorText)
+        throw new Error(`Failed to fetch campaigns: ${response.status} ${errorText}`)
+      }
+      
+      const result = await response.json()
+      console.log('API Result:', result)
+      setCampaigns(result.data || [])
+    } catch (err) {
+      console.error('Fetch error:', err)
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCampaignClick = (campaignId: number) => {
+    console.log('Dashboard campaign clicked!', campaignId)
+    router.push(`/dashboard/campaigns/${campaignId}`)
+  }
+
+  const handleRowClick = (campaign: Campaign, e: React.MouseEvent) => {
+    // Don't navigate if clicking on buttons
+    if ((e.target as HTMLElement).closest('button')) {
+      return
+    }
+    handleCampaignClick(campaign.id)
+  }
+
+  // Calculate totals from real data
+  const totalCampaigns = campaigns.length
+  const activeCampaigns = campaigns.filter(c => c.status === 'active').length
+  const totalLeads = campaigns.reduce((sum, c) => sum + (c.totalLeads || 0), 0)
+  const totalResponses = campaigns.reduce((sum, c) => sum + (c.stats?.responded || 0), 0)
+  const responseRate = totalLeads > 0 ? ((totalResponses / totalLeads) * 100).toFixed(1) : '0.0'
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -98,7 +144,7 @@ export default function CampaignsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Campaigns</p>
-                <p className="text-2xl font-bold text-gray-900">12</p>
+                <p className="text-2xl font-bold text-gray-900">{totalCampaigns}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                 <Target className="h-6 w-6 text-blue-600" />
@@ -112,7 +158,7 @@ export default function CampaignsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Active Campaigns</p>
-                <p className="text-2xl font-bold text-gray-900">8</p>
+                <p className="text-2xl font-bold text-gray-900">{activeCampaigns}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                 <Play className="h-6 w-6 text-green-600" />
@@ -126,7 +172,7 @@ export default function CampaignsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Leads</p>
-                <p className="text-2xl font-bold text-gray-900">1,357</p>
+                <p className="text-2xl font-bold text-gray-900">{totalLeads.toLocaleString()}</p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                 <Users className="h-6 w-6 text-purple-600" />
@@ -140,7 +186,7 @@ export default function CampaignsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Response Rate</p>
-                <p className="text-2xl font-bold text-gray-900">23.4%</p>
+                <p className="text-2xl font-bold text-gray-900">{responseRate}%</p>
               </div>
               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                 <TrendingUp className="h-6 w-6 text-orange-600" />
@@ -190,65 +236,109 @@ export default function CampaignsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Campaign Name</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Leads</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Connections</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Replies</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Progress</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500">Status</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-500"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockCampaigns.map((campaign) => (
-                  <tr key={campaign.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4 px-4">
-                      <div>
-                        <p className="font-medium text-gray-900">{campaign.name}</p>
-                        <p className="text-sm text-gray-500">Last activity {campaign.lastActivity}</p>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center">
-                        <Users className="w-4 h-4 text-gray-400 mr-2" />
-                        <span className="text-gray-900">{campaign.leads}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                        <span className="text-gray-900">{campaign.connections}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center">
-                        <MessageSquare className="w-4 h-4 text-blue-500 mr-2" />
-                        <span className="text-gray-900">{campaign.replies}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center space-x-2">
-                        <Progress value={campaign.progress} className="w-20" />
-                        <span className="text-sm text-gray-600">{campaign.progress}% complete</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      {getStatusBadge(campaign.status)}
-                    </td>
-                    <td className="py-4 px-4">
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </td>
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+              <span className="ml-2 text-gray-600">Loading campaigns...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600 mb-4">Error loading campaigns: {error}</p>
+              <Button onClick={fetchCampaigns} variant="outline">
+                Try Again
+              </Button>
+            </div>
+          ) : campaigns.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600 mb-4">No campaigns found</p>
+              <Button onClick={() => router.push('/dashboard/campaigns/new')}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Campaign
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 font-medium text-gray-500">Campaign Name</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-500">Leads</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-500">Contacted</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-500">Replies</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-500">Progress</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-500">Status</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-500"></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {campaigns.map((campaign) => {
+                    const contacted = campaign.stats?.contacted || 0
+                    const progress = campaign.totalLeads > 0 ? Math.round((contacted / campaign.totalLeads) * 100) : 0
+                    const lastActivity = new Date(campaign.updatedAt).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric', 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })
+                    
+                    return (
+                      <tr 
+                        key={campaign.id} 
+                        className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                        onClick={(e) => handleRowClick(campaign, e)}
+                      >
+                        <td className="py-4 px-4">
+                          <div>
+                            <p className="font-medium text-gray-900">{campaign.name}</p>
+                            <p className="text-sm text-gray-500">Last activity {lastActivity}</p>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center">
+                            <Users className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="text-gray-900">{campaign.totalLeads}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                            <span className="text-gray-900">{contacted}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center">
+                            <MessageSquare className="w-4 h-4 text-blue-500 mr-2" />
+                            <span className="text-gray-900">{campaign.stats?.responded || 0}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-2">
+                            <Progress value={progress} className="w-20" />
+                            <span className="text-sm text-gray-600">{progress}% complete</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          {getStatusBadge(campaign.status)}
+                        </td>
+                        <td className="py-4 px-4">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // Add menu functionality here
+                            }}
+                          >
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

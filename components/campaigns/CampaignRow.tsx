@@ -5,17 +5,17 @@ import { ProgressBar } from '@/components/ui/progress-bar'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { formatDistanceToNow } from 'date-fns'
 import { Eye, Users, Mail, Calendar } from 'lucide-react'
-import { useUIStore } from '@/stores/uiStore'
+import { useRouter } from 'next/navigation'
 
 interface CampaignRowProps {
   campaign: Campaign
 }
 
 export function CampaignRow({ campaign }: CampaignRowProps) {
-  const { openCampaignSheet } = useUIStore()
+  const router = useRouter()
 
   const handleClick = () => {
-    openCampaignSheet(campaign.id)
+    router.push(`/dashboard/campaigns/${campaign.id}`)
   }
 
   // Calculate progress percentage (using mock data since fields don't exist)

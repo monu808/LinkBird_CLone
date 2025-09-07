@@ -92,6 +92,10 @@ class ApiClient {
       return this.makeRequest<Campaign>(`/campaigns/${id}`)
     },
 
+    getById: async (id: string): Promise<Campaign> => {
+      return this.makeRequest<Campaign>(`/campaigns/${id}`)
+    },
+
     create: async (data: CreateCampaignRequest): Promise<Campaign> => {
       return this.makeRequest<Campaign>('/campaigns', {
         method: 'POST',
@@ -112,7 +116,7 @@ class ApiClient {
       })
     },
 
-    getLeads: async (id: number, params?: LeadQueryParams): Promise<{
+    getLeads: async (id: string, params?: LeadQueryParams): Promise<{
       data: Lead[]
       campaign: Campaign
       pagination: {
@@ -132,6 +136,13 @@ class ApiClient {
       }
       const query = searchParams.toString()
       return this.makeRequest(`/campaigns/${id}/leads${query ? `?${query}` : ''}`)
+    },
+
+    getSequence: async (id: string): Promise<{
+      data: any[]
+      campaign: Campaign
+    }> => {
+      return this.makeRequest(`/campaigns/${id}/sequence`)
     },
   }
 }
@@ -167,7 +178,7 @@ export const useCampaign = (id: number) => {
   }
 }
 
-export const useCampaignLeads = (id: number, params?: LeadQueryParams) => {
+export const useCampaignLeads = (id: string, params?: LeadQueryParams) => {
   return {
     queryKey: ['campaign-leads', id, params],
     queryFn: () => apiClient.campaigns.getLeads(id, params),

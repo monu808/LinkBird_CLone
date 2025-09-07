@@ -41,7 +41,10 @@ export const useUIStore = create<UIState>((set) => ({
   // Campaign side sheet
   selectedCampaignId: null,
   isCampaignSheetOpen: false,
-  openCampaignSheet: (campaignId) => set({ selectedCampaignId: campaignId, isCampaignSheetOpen: true }),
+  openCampaignSheet: (campaignId) => {
+    console.log('Opening campaign sheet for ID:', campaignId)
+    set({ selectedCampaignId: campaignId, isCampaignSheetOpen: true })
+  },
   closeCampaignSheet: () => set({ selectedCampaignId: null, isCampaignSheetOpen: false }),
   
   // Table sorting
