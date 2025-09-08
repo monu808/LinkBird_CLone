@@ -25,15 +25,15 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Full Name</label>
-              <Input defaultValue="Kandid Personal" />
+              <Input defaultValue="John Smith" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Email</label>
-              <Input defaultValue="bhavya@kandid.ai" />
+              <Input defaultValue="john@linkbird.com" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Company</label>
-              <Input defaultValue="Kandid.AI" />
+              <Input defaultValue="LinkBird Inc." />
             </div>
             <Button>Save Changes</Button>
           </CardContent>

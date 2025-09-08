@@ -12,7 +12,7 @@ const campaignNames = [
 ]
 
 const companies = [
-  'TechCorp', 'DevStudio', 'InnovateLab', 'SalesForce Inc.', 'BrandCo',
+  'TechCorp', 'DevStudio', 'InnovateLab', 'SalesForce Inc.', 'LinkBird Solutions',
   'DataDynamics', 'CloudFirst', 'AIVentures', 'NextGen Solutions', 'DigitalEdge',
   'Microsoft', 'Google', 'Amazon', 'Meta', 'Apple', 'Netflix', 'Spotify'
 ]

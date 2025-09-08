@@ -1,4 +1,4 @@
-# LinkBird.ai Clone
+# LinkBird - LinkedIn Lead Generation Platform
 
 A complete LinkedIn lead generation and campaign management platform built with Next.js 15, featuring authentication, dashboard, leads management, and campaigns overview.
 
@@ -16,7 +16,7 @@ A complete LinkedIn lead generation and campaign management platform built with 
 #### Application Layout & Navigation
 - **Responsive Sidebar** - Collapsible navigation with active state indicators
 - **Mobile-First Design** - Fully responsive on all devices
-- **Clean UI/UX** - Professional interface matching LinkBird.ai design
+- **Clean UI/UX** - Professional interface matching LinkBird design
 - **Breadcrumb Navigation** - Clear page hierarchy
 - **User Profile Section** - Profile info and logout in sidebar
 

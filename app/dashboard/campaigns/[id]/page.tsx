@@ -5,6 +5,9 @@ import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { SegmentTabs } from '@/src/components/SegmentTabs'
 import { PlaceholderCard } from '@/src/components/PlaceholderCard'
 import { 
@@ -17,7 +20,11 @@ import {
   MessageSquare,
   TrendingUp,
   ArrowLeft,
-  Loader2
+  Loader2,
+  Eye,
+  Filter,
+  Search,
+  Power
 } from 'lucide-react'
 
 interface Campaign {
@@ -45,6 +52,65 @@ export default function CampaignDetailsPage() {
   const [campaign, setCampaign] = useState<Campaign | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Settings form state
+  const [campaignName, setCampaignName] = useState('')
+  const [campaignStatus, setCampaignStatus] = useState('active')
+  const [autopilotMode, setAutopilotMode] = useState(false)
+  
+  // Mock leads data for this campaign
+  const mockCampaignLeads = [
+    {
+      id: 1,
+      name: 'John Smith',
+      email: 'john.smith@company.com',
+      jobTitle: 'Marketing Director',
+      company: 'TechCorp Inc.',
+      status: 'contacted',
+      lastContacted: '2025-09-07T10:30:00Z',
+      responseRate: '15%'
+    },
+    {
+      id: 2,
+      name: 'Sarah Johnson',
+      email: 'sarah.j@startup.io',
+      jobTitle: 'CEO',
+      company: 'StartupIO',
+      status: 'responded',
+      lastContacted: '2025-09-06T14:20:00Z',
+      responseRate: '25%'
+    },
+    {
+      id: 3,
+      name: 'Mike Wilson',
+      email: 'mike.wilson@enterprise.com',
+      jobTitle: 'Sales Manager',
+      company: 'Enterprise Solutions',
+      status: 'converted',
+      lastContacted: '2025-09-05T09:15:00Z',
+      responseRate: '30%'
+    },
+    {
+      id: 4,
+      name: 'Lisa Chen',
+      email: 'lisa.chen@techfirm.com',
+      jobTitle: 'Product Manager',
+      company: 'TechFirm',
+      status: 'pending',
+      lastContacted: null,
+      responseRate: '0%'
+    },
+    {
+      id: 5,
+      name: 'David Brown',
+      email: 'david@consulting.com',
+      jobTitle: 'Consultant',
+      company: 'Brown Consulting',
+      status: 'contacted',
+      lastContacted: '2025-09-08T08:45:00Z',
+      responseRate: '12%'
+    }
+  ]
 
   // Fetch campaign details from API
   useEffect(() => {
@@ -69,6 +135,11 @@ export default function CampaignDetailsPage() {
       const result = await response.json()
       console.log('Campaign details result:', result)
       setCampaign(result)
+      
+      // Initialize form fields
+      setCampaignName(result.name || '')
+      setCampaignStatus(result.status || 'active')
+      setAutopilotMode(false) // Default value
     } catch (err) {
       console.error('Fetch campaign error:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -316,30 +387,470 @@ export default function CampaignDetailsPage() {
           )}
 
           {activeTab === 'leads' && (
-            <PlaceholderCard 
-              title="Campaign Leads"
-              description="Lead management functionality will be implemented here."
-              statusText="Coming Soon"
-              statusColor="blue"
-            />
+            <div className="space-y-6">
+              {/* Leads Summary Cards */}
+              <div className="grid grid-cols-4 gap-4">
+                <Card className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Total Leads</p>
+                      <p className="text-2xl font-bold text-gray-900">{mockCampaignLeads.length}</p>
+                    </div>
+                    <Users className="h-8 w-8 text-blue-500" />
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Contacted</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {mockCampaignLeads.filter(lead => lead.status === 'contacted' || lead.status === 'responded' || lead.status === 'converted').length}
+                      </p>
+                    </div>
+                    <Mail className="h-8 w-8 text-green-500" />
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Responded</p>
+                      <p className="text-2xl font-bold text-purple-600">
+                        {mockCampaignLeads.filter(lead => lead.status === 'responded' || lead.status === 'converted').length}
+                      </p>
+                    </div>
+                    <MessageSquare className="h-8 w-8 text-purple-500" />
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Converted</p>
+                      <p className="text-2xl font-bold text-orange-600">
+                        {mockCampaignLeads.filter(lead => lead.status === 'converted').length}
+                      </p>
+                    </div>
+                    <CheckCircle className="h-8 w-8 text-orange-500" />
+                  </div>
+                </Card>
+              </div>
+
+              {/* Leads Filters */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input placeholder="Search leads..." className="pl-10 w-64" />
+                  </div>
+                  <Button variant="outline">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filter
+                  </Button>
+                </div>
+                <Button>
+                  <Users className="h-4 w-4 mr-2" />
+                  Add Leads
+                </Button>
+              </div>
+
+              {/* Leads Table */}
+              <Card className="overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Company</TableHead>
+                      <TableHead>Job Title</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Last Contacted</TableHead>
+                      <TableHead>Response Rate</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockCampaignLeads.map((lead) => (
+                      <TableRow key={lead.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-gray-900">{lead.name}</div>
+                            <div className="text-sm text-gray-500">{lead.email}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{lead.company}</TableCell>
+                        <TableCell>{lead.jobTitle}</TableCell>
+                        <TableCell>
+                          <Badge 
+                            className={
+                              lead.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              lead.status === 'contacted' ? 'bg-blue-100 text-blue-800' :
+                              lead.status === 'responded' ? 'bg-green-100 text-green-800' :
+                              lead.status === 'converted' ? 'bg-purple-100 text-purple-800' :
+                              'bg-gray-100 text-gray-800'
+                            }
+                          >
+                            {lead.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {lead.lastContacted ? new Date(lead.lastContacted).toLocaleDateString() : '-'}
+                        </TableCell>
+                        <TableCell>{lead.responseRate}</TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            </div>
           )}
 
           {activeTab === 'sequence' && (
-            <PlaceholderCard 
-              title="Message Sequence"
-              description="Campaign sequence management will be implemented here."
-              statusText="In Development"
-              statusColor="yellow"
-            />
+            <div className="space-y-6">
+              {/* Request Message Section */}
+              <Card className="p-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Request Message</h4>
+                <p className="text-sm text-gray-600 mb-4">Edit your request message here</p>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Message Template */}
+                  <div className="lg:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Message Template
+                    </label>
+                    <p className="text-xs text-gray-500 mb-3">
+                      Design your message template using the available fields<br />
+                      Use {`{{field_name}}`} to insert mapped fields from your Data
+                    </p>
+                    <Textarea 
+                      placeholder="Type your message here..."
+                      className="min-h-[200px] resize-none"
+                    />
+                  </div>
+                  
+                  {/* Available Fields Sidebar */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h5 className="text-sm font-semibold text-gray-900 mb-4">Available fields:</h5>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <h6 className="text-xs font-medium text-gray-700 mb-2">Settings & Billing</h6>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex items-center justify-between">
+                            <span>{`{{fullName}}`}</span>
+                            <span>Full Name</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h6 className="text-xs font-medium text-gray-700 mb-2">Admin Panel</h6>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex items-center justify-between">
+                            <span>{`{{firstName}}`}</span>
+                            <span>First Name</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h6 className="text-xs font-medium text-gray-700 mb-2">Activity logs</h6>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex items-center justify-between">
+                            <span>{`{{lastName}}`}</span>
+                            <span>Last Name</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h6 className="text-xs font-medium text-gray-700 mb-2">User logs</h6>
+                      </div>
+                      
+                      <div>
+                        <h6 className="text-xs font-medium text-gray-700 mb-2">Message Sequence</h6>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex items-center justify-between">
+                            <span>{`{{jobTitle}}`}</span>
+                            <span>Job Title</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="pt-2 border-t border-gray-200">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-medium">8</span>
+                          <span className="font-medium">0</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+              
+              {/* Connection Message Section */}
+              <Card className="p-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Connection Message</h4>
+                <p className="text-sm text-gray-600 mb-4">Edit your connection message here</p>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Message Template */}
+                  <div className="lg:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Message Template
+                    </label>
+                    <p className="text-xs text-gray-500 mb-3">
+                      Design your connection message template using the available fields<br />
+                      Use {`{{field_name}}`} to insert mapped fields from your Data
+                    </p>
+                    <Textarea 
+                      placeholder="Type your connection message here..."
+                      className="min-h-[200px] resize-none"
+                    />
+                  </div>
+                  
+                  {/* Available Fields Sidebar - Same as above */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h5 className="text-sm font-semibold text-gray-900 mb-4">Available fields:</h5>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <h6 className="text-xs font-medium text-gray-700 mb-2">Settings & Billing</h6>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex items-center justify-between">
+                            <span>{`{{fullName}}`}</span>
+                            <span>Full Name</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h6 className="text-xs font-medium text-gray-700 mb-2">Admin Panel</h6>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex items-center justify-between">
+                            <span>{`{{firstName}}`}</span>
+                            <span>First Name</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h6 className="text-xs font-medium text-gray-700 mb-2">Activity logs</h6>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex items-center justify-between">
+                            <span>{`{{lastName}}`}</span>
+                            <span>Last Name</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h6 className="text-xs font-medium text-gray-700 mb-2">User logs</h6>
+                      </div>
+                      
+                      <div>
+                        <h6 className="text-xs font-medium text-gray-700 mb-2">Message Sequence</h6>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex items-center justify-between">
+                            <span>{`{{jobTitle}}`}</span>
+                            <span>Job Title</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="pt-2 border-t border-gray-200">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-medium">8</span>
+                          <span className="font-medium">0</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
           )}
 
           {activeTab === 'settings' && (
-            <PlaceholderCard 
-              title="Campaign Settings"
-              description="Campaign configuration options will be implemented here."
-              statusText="Available"
-              statusColor="green"
-            />
+            <div className="space-y-6">
+              {/* Campaign Basic Settings */}
+              <Card className="p-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">Campaign Settings</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Campaign Name
+                      </label>
+                      <Input 
+                        value={campaignName}
+                        onChange={(e) => setCampaignName(e.target.value)}
+                        placeholder="Enter campaign name"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Campaign Status
+                      </label>
+                      <select 
+                        value={campaignStatus}
+                        onChange={(e) => setCampaignStatus(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="active">Active</option>
+                        <option value="paused">Paused</option>
+                        <option value="draft">Draft</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Campaign Description
+                      </label>
+                      <Textarea 
+                        placeholder="Enter campaign description..."
+                        className="min-h-[100px] resize-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Autopilot Settings */}
+              <Card className="p-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">Automation Settings</h4>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <h5 className="text-sm font-semibold text-gray-900">Autopilot Mode</h5>
+                      <p className="text-sm text-gray-600">
+                        Let the system automatically manage LinkedIn account assignments and optimize outreach timing
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setAutopilotMode(!autopilotMode)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                        autopilotMode ? 'bg-blue-600' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          autopilotMode ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  
+                  {autopilotMode && (
+                    <div className="ml-4 space-y-3 border-l-2 border-blue-200 pl-4">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm text-gray-600">Automatic account rotation</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm text-gray-600">Smart timing optimization</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm text-gray-600">Response rate monitoring</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm text-gray-600">Automatic follow-up scheduling</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Card>
+
+              {/* LinkedIn Account Management */}
+              <Card className="p-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">LinkedIn Account Management</h4>
+                
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Daily Connection Limit
+                      </label>
+                      <Input type="number" defaultValue="20" min="1" max="100" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Daily Message Limit
+                      </label>
+                      <Input type="number" defaultValue="50" min="1" max="200" />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Time Between Actions (minutes)
+                      </label>
+                      <Input type="number" defaultValue="15" min="5" max="60" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Working Hours
+                      </label>
+                      <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="9-17">9:00 AM - 5:00 PM</option>
+                        <option value="8-18">8:00 AM - 6:00 PM</option>
+                        <option value="10-16">10:00 AM - 4:00 PM</option>
+                        <option value="24h">24 Hours</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Advanced Settings */}
+              <Card className="p-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">Advanced Settings</h4>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="text-sm font-semibold text-gray-900">Smart Reply Detection</h5>
+                      <p className="text-sm text-gray-600">Automatically detect and categorize lead responses</p>
+                    </div>
+                    <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                      <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6 transition-transform" />
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="text-sm font-semibold text-gray-900">Auto-follow Up</h5>
+                      <p className="text-sm text-gray-600">Automatically send follow-up messages based on templates</p>
+                    </div>
+                    <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                      <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="text-sm font-semibold text-gray-900">Lead Scoring</h5>
+                      <p className="text-sm text-gray-600">Automatically score leads based on engagement and profile data</p>
+                    </div>
+                    <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                      <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6 transition-transform" />
+                    </button>
+                  </div>
+                </div>
+              </Card>
+            </div>
           )}
         </div>
       </div>

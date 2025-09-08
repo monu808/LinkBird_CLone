@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/lib/store'
@@ -83,16 +84,21 @@ export default function Sidebar({ children }: SidebarProps) {
         <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
           <Link href="/dashboard" className="flex items-center">
             {sidebarCollapsed ? (
-              <div className="w-8 h-8 bg-blue-600 rounded text-white text-sm font-bold flex items-center justify-center">
-                L
-              </div>
+              <Image 
+                src="/Logo.png" 
+                alt="LinkBird Logo" 
+                width={48}
+                height={48}
+                className="object-contain"
+              />
             ) : (
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded text-white text-sm font-bold flex items-center justify-center">
-                  L
-                </div>
-                <span className="text-xl font-bold text-gray-900">LinkBird</span>
-              </div>
+              <Image 
+                src="/Logo.png" 
+                alt="LinkBird Logo" 
+                width={140}
+                height={56}
+                className="object-contain"
+              />
             )}
           </Link>
           <Button
