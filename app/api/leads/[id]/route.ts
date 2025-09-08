@@ -21,7 +21,7 @@ const updateLeadSchema = z.object({
 // GET /api/leads/[id] - Get a specific lead
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -32,7 +32,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const leadId = parseInt(params.id)
+    const resolvedParams = await params
+    const leadId = parseInt(resolvedParams.id)
     if (isNaN(leadId)) {
       return NextResponse.json({ error: 'Invalid lead ID' }, { status: 400 })
     }
@@ -83,7 +84,7 @@ export async function GET(
 // PUT /api/leads/[id] - Update a specific lead
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -94,7 +95,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const leadId = parseInt(params.id)
+    const resolvedParams = await params
+    const leadId = parseInt(resolvedParams.id)
     if (isNaN(leadId)) {
       return NextResponse.json({ error: 'Invalid lead ID' }, { status: 400 })
     }
@@ -171,7 +173,7 @@ export async function PUT(
 // DELETE /api/leads/[id] - Delete a specific lead
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -182,7 +184,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const leadId = parseInt(params.id)
+    const resolvedParams = await params
+    const leadId = parseInt(resolvedParams.id)
     if (isNaN(leadId)) {
       return NextResponse.json({ error: 'Invalid lead ID' }, { status: 400 })
     }

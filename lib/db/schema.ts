@@ -1,6 +1,6 @@
 import { pgTable, serial, text, timestamp, boolean, integer, varchar, primaryKey } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
-import type { AdapterAccount } from "@auth/core/adapters"
+// import type { AdapterAccount } from "@auth/core/adapters"
 
 // NextAuth.js Users table
 export const users = pgTable('user', {
@@ -16,7 +16,7 @@ export const users = pgTable('user', {
 // NextAuth.js Accounts table
 export const accounts = pgTable('account', {
   userId: text('userId').notNull(),
-  type: text('type').$type<AdapterAccount['type']>().notNull(),
+  type: text('type').notNull(), // .$type<AdapterAccount['type']>()
   provider: text('provider').notNull(),
   providerAccountId: text('providerAccountId').notNull(),
   refresh_token: text('refresh_token'),
@@ -141,7 +141,7 @@ export const linkedinAccountsRelations = relations(linkedinAccounts, ({ one }) =
 export type User = typeof users.$inferSelect
 export type Session = typeof sessions.$inferSelect
 export type Account = typeof accounts.$inferSelect
-export type Verification = typeof verifications.$inferSelect
+// export type Verification = typeof verifications.$inferSelect
 export type Campaign = typeof campaigns.$inferSelect
 export type Lead = typeof leads.$inferSelect
 export type LinkedinAccount = typeof linkedinAccounts.$inferSelect
@@ -149,7 +149,7 @@ export type LinkedinAccount = typeof linkedinAccounts.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type NewSession = typeof sessions.$inferInsert
 export type NewAccount = typeof accounts.$inferInsert
-export type NewVerification = typeof verifications.$inferInsert
+// export type NewVerification = typeof verifications.$inferInsert
 export type NewCampaign = typeof campaigns.$inferInsert
 export type NewLead = typeof leads.$inferInsert
 export type NewLinkedinAccount = typeof linkedinAccounts.$inferInsert

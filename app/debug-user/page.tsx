@@ -12,10 +12,7 @@ export default function DebugUserPage() {
     try {
       if (!user?.primaryEmail) return
       
-      const result = await stackApp.sendForgotPasswordEmail({
-        email: user.primaryEmail,
-        redirectUrl: `${window.location.origin}/reset-password`
-      })
+      const result = await stackApp.sendForgotPasswordEmail(user.primaryEmail)
       setResult(result)
     } catch (error) {
       setResult({ error: error })
@@ -50,7 +47,7 @@ export default function DebugUserPage() {
           <div className="space-y-2">
             <p><strong>Has Password:</strong> {user.hasPassword ? '✅ Yes' : '❌ No'}</p>
             <p><strong>Email Verified:</strong> {user.primaryEmailVerified ? '✅ Yes' : '❌ No'}</p>
-            <p><strong>Auth with Email:</strong> {user.authWithEmail ? '✅ Enabled' : '❌ Disabled'}</p>
+            <p><strong>Auth with Email:</strong> {user.primaryEmail ? '✅ Enabled' : '❌ Disabled'}</p>
           </div>
         </div>
 

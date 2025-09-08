@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { campaigns, leads } from '@/lib/db/schema'
-// import { auth } from '@/lib/auth' // TODO: Replace with Stack Framework auth
+import { auth } from '@/lib/auth'
 import { eq, and, desc, count } from 'drizzle-orm'
 import { z } from 'zod'
 
@@ -14,7 +14,7 @@ const updateCampaignSchema = z.object({
 // GET /api/campaigns/[id] - Get a specific campaign with stats
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -25,7 +25,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const campaignId = parseInt(params.id)
+    const resolvedParams = await params
+    const campaignId = parseInt(resolvedParams.id)
     if (isNaN(campaignId)) {
       return NextResponse.json({ error: 'Invalid campaign ID' }, { status: 400 })
     }
@@ -92,7 +93,7 @@ export async function GET(
 // PUT /api/campaigns/[id] - Update a specific campaign
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -103,7 +104,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const campaignId = parseInt(params.id)
+    const resolvedParams = await params
+    const campaignId = parseInt(resolvedParams.id)
     if (isNaN(campaignId)) {
       return NextResponse.json({ error: 'Invalid campaign ID' }, { status: 400 })
     }
@@ -158,7 +160,7 @@ export async function PUT(
 // DELETE /api/campaigns/[id] - Delete a specific campaign
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -169,7 +171,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const campaignId = parseInt(params.id)
+    const resolvedParams = await params
+    const campaignId = parseInt(resolvedParams.id)
     if (isNaN(campaignId)) {
       return NextResponse.json({ error: 'Invalid campaign ID' }, { status: 400 })
     }

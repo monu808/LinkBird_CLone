@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import Sidebar from '@/components/layout/sidebar'
+import { ProtectedRoute } from '@/components/auth/protected-route'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -36,25 +37,21 @@ export default function CampaignDetailsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 flex items-center justify-center">
+      <ProtectedRoute>
+        <Sidebar>
+          <div className="flex-1 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </main>
-        </div>
-      </div>
+          </div>
+        </Sidebar>
+      </ProtectedRoute>
     )
   }
 
   if (error || !campaign) {
     return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 flex items-center justify-center">
+      <ProtectedRoute>
+        <Sidebar>
+          <div className="flex-1 flex items-center justify-center p-8">
             <Card className="p-8 text-center">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Campaign not found</h2>
               <p className="text-gray-600 mb-4">The campaign you're looking for doesn't exist or has been deleted.</p>
@@ -62,20 +59,16 @@ export default function CampaignDetailsPage() {
                 Back to Campaigns
               </Button>
             </Card>
-          </main>
-        </div>
-      </div>
+          </div>
+        </Sidebar>
+      </ProtectedRoute>
     )
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        
-        <main className="flex-1 overflow-auto">
+    <ProtectedRoute>
+      <Sidebar>
+        <div className="flex-1 overflow-auto">
           {/* Breadcrumb */}
           <div className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -274,8 +267,8 @@ export default function CampaignDetailsPage() {
               </TabsContent>
             </Tabs>
           </div>
-        </main>
-      </div>
-    </div>
+        </div>
+      </Sidebar>
+    </ProtectedRoute>
   )
 }

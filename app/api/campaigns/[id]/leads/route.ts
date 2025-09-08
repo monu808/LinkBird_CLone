@@ -17,7 +17,7 @@ const querySchema = z.object({
 // GET /api/campaigns/[id]/leads - Get all leads for a specific campaign
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({
@@ -28,7 +28,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const campaignId = parseInt(params.id)
+    const resolvedParams = await params
+    const campaignId = parseInt(resolvedParams.id)
     if (isNaN(campaignId)) {
       return NextResponse.json({ error: 'Invalid campaign ID' }, { status: 400 })
     }

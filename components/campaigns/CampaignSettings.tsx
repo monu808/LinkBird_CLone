@@ -299,7 +299,7 @@ export function CampaignSettings({ campaign }: CampaignSettingsProps) {
                         } else {
                           setFormData({
                             ...formData,
-                            workingDays: formData.workingDays.filter(d => d !== day.key)
+                            workingDays: formData.workingDays.filter((d: string) => d !== day.key)
                           })
                         }
                       }}
@@ -311,7 +311,7 @@ export function CampaignSettings({ campaign }: CampaignSettingsProps) {
               </div>
             ) : (
               <div className="flex flex-wrap gap-2">
-                {formData.workingDays.map((day) => (
+                {formData.workingDays.map((day: string) => (
                   <Badge key={day} variant="outline" className="capitalize">
                     {day}
                   </Badge>
