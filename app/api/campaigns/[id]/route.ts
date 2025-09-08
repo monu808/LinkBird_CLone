@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { campaigns, leads } from '@/lib/db/schema'
-import { auth } from '@/lib/auth'
-import { eq, and, count } from 'drizzle-orm'
+// import { auth } from '@/lib/auth' // TODO: Replace with Stack Framework auth
+import { eq, and, desc, count } from 'drizzle-orm'
 import { z } from 'zod'
 
 const updateCampaignSchema = z.object({

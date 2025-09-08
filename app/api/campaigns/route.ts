@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { campaigns, leads } from '@/lib/db/schema'
-import { auth } from '@/lib/auth'
+// import { auth } from '@/lib/auth' // TODO: Replace with Stack Framework auth
 import { eq, and, desc, asc, like, count } from 'drizzle-orm'
 import { z } from 'zod'
 
@@ -30,13 +30,14 @@ const querySchema = z.object({
 // GET /api/campaigns - List campaigns with pagination and filtering
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    })
+    // TODO: Replace with Stack Framework authentication
+    // const session = await auth.api.getSession({
+    //   headers: request.headers,
+    // })
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // if (!session) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // }
 
     const { searchParams } = new URL(request.url)
     const params = querySchema.parse(Object.fromEntries(searchParams))
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit
 
     // Build where conditions
-    const conditions = [eq(campaigns.userId, session.user.id)]
+    const conditions = [eq(campaigns.userId, "1")] // TODO: Replace with actual user ID
     
     if (params.search) {
       conditions.push(like(campaigns.name, `%${params.search}%`))
@@ -114,13 +115,14 @@ export async function GET(request: NextRequest) {
 // POST /api/campaigns - Create a new campaign
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    })
+    // TODO: Replace with Stack Framework authentication
+    // const session = await auth.api.getSession({
+    //   headers: request.headers,
+    // })
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // if (!session) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // }
 
     const body = await request.json()
     const validatedData = createCampaignSchema.parse(body)
@@ -128,7 +130,7 @@ export async function POST(request: NextRequest) {
     // Convert startDate string to Date if provided
     const insertData: any = {
       ...validatedData,
-      userId: session.user.id,
+      userId: "1", // TODO: Replace with actual user ID
       createdAt: new Date(),
       updatedAt: new Date(),
     }

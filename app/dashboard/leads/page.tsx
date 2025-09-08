@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Filter, Plus } from 'lucide-react'
-import { LeadTable } from '@/src/components/LeadTable'
+import { LeadsTable } from '@/components/leads/LeadsTable'
 import { LeadSideSheet } from '@/components/leads/LeadSideSheet'
 
 export default function LeadsPage() {
@@ -53,7 +53,7 @@ export default function LeadsPage() {
         </div>
         
         <div className="h-[calc(100vh-320px)] overflow-auto rounded-md" aria-label="Leads list container">
-          <LeadTable />
+          <LeadsTable />
         </div>
       </Card>
       

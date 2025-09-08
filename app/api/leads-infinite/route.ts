@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { leads, campaigns } from '@/lib/db/schema'
-import { auth } from '@/lib/auth'
+// import { auth } from '@/lib/auth' // TODO: Replace with Stack Framework auth
 import { eq, and, desc, like } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    })
+    // TODO: Replace with Stack Framework authentication
+    // const session = await auth.api.getSession({
+    //   headers: request.headers,
+    // })
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // if (!session) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // }
 
     const { searchParams } = new URL(request.url)
     const cursor = searchParams.get('cursor') || '0'
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(cursor)
 
     // Build where conditions
-    const conditions = [eq(leads.userId, session.user.id)]
+    const conditions = [eq(leads.userId, "1")] // TODO: Replace with actual user ID
     
     if (search) {
       conditions.push(

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { leads, campaigns } from '@/lib/db/schema'
-import { auth } from '@/lib/auth'
+// import { auth } from '@/lib/auth' // TODO: Replace with Stack Framework auth
 import { eq, and, desc, asc, like, count } from 'drizzle-orm'
 import { z } from 'zod'
 
@@ -42,13 +42,14 @@ const querySchema = z.object({
 // GET /api/leads - List leads with pagination and filtering
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    })
+    // TODO: Replace with Stack Framework authentication
+    // const session = await auth.api.getSession({
+    //   headers: request.headers,
+    // })
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // if (!session) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // }
 
     const { searchParams } = new URL(request.url)
     const params = querySchema.parse(Object.fromEntries(searchParams))
@@ -58,7 +59,8 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit
 
     // Build where conditions
-    const conditions = [eq(leads.userId, session.user.id)]
+    // TODO: Replace with actual user ID from Stack Framework auth
+    const conditions = [eq(leads.userId, "1")] // Temporarily hardcoded
     
     if (params.search) {
       conditions.push(
@@ -145,13 +147,14 @@ export async function GET(request: NextRequest) {
 // POST /api/leads - Create a new lead
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    })
+    // TODO: Replace with Stack Framework authentication
+    // const session = await auth.api.getSession({
+    //   headers: request.headers,
+    // })
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // if (!session) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // }
 
     const body = await request.json()
     const validatedData = createLeadSchema.parse(body)
@@ -162,7 +165,7 @@ export async function POST(request: NextRequest) {
       .from(campaigns)
       .where(and(
         eq(campaigns.id, validatedData.campaignId),
-        eq(campaigns.userId, session.user.id)
+        eq(campaigns.userId, "1") // TODO: Replace with actual user ID
       ))
       .limit(1)
 
@@ -177,7 +180,7 @@ export async function POST(request: NextRequest) {
       .insert(leads)
       .values({
         ...validatedData,
-        userId: session.user.id,
+        userId: "1", // TODO: Replace with actual user ID
         createdAt: new Date(),
         updatedAt: new Date(),
       })
