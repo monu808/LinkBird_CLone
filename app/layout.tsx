@@ -1,4 +1,6 @@
 import './globals.css'
+import { StackProvider, StackTheme } from "@stackframe/stack";
+import { stackServerApp } from "../stack";
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Providers } from '@/src/components/Providers'
@@ -38,11 +40,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={inter.className}><StackProvider app={stackServerApp}><StackTheme>
         <Providers>
           {children}
         </Providers>
-      </body>
+      </StackTheme></StackProvider></body>
     </html>
   )
 }

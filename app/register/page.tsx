@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
-import { signUp, signIn } from '@/lib/auth-client'
+import { useStackApp, useUser } from "@stackframe/stack"
 
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState('')
@@ -15,6 +15,14 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const router = useRouter()
+  const stackApp = useStackApp()
+  const user = useUser()
+
+  // Redirect if already logged in
+  if (user) {
+    router.push('/dashboard')
+    return null
+  }
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -32,26 +40,31 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    console.log('Register form submitted', { email, password, firstName, lastName })
+    
     if (!validateForm()) return
     
     setIsLoading(true)
     setErrors({})
 
     try {
-      const result = await signUp.email({
+      console.log('Attempting to sign up with Stack')
+      const result = await stackApp.signUpWithCredential({
         email,
         password,
-        name: `${firstName} ${lastName}`,
-        fetchOptions: {
-          onSuccess: () => {
-            router.push('/dashboard')
-          },
-          onError: (ctx) => {
-            throw new Error(ctx.error.message || 'Failed to create account')
-          },
-        },
       })
+      console.log('Sign up result:', result)
+      
+      if (result.status === 'ok') {
+        // Registration successful - redirect to dashboard
+        // The user can now log in with their credentials
+        router.push('/login?message=Registration successful! Please log in with your credentials.')
+      } else {
+        // Handle error from Stack
+        setErrors({ general: result.error.message || 'Failed to create account. Please try again.' })
+      }
     } catch (err: any) {
+      console.error('Sign up error:', err)
       setErrors({ general: err.message || 'Failed to create account. Please try again.' })
     } finally {
       setIsLoading(false)
@@ -61,10 +74,7 @@ export default function RegisterPage() {
   const handleGoogleSignUp = async () => {
     setIsLoading(true)
     try {
-      await signIn.social({
-        provider: 'google',
-        callbackURL: '/dashboard',
-      })
+      await stackApp.signInWithOAuth('google')
     } catch (err: any) {
       setErrors({ general: 'Failed to sign up with Google' })
     } finally {

@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
-import { signIn } from '@/lib/auth-client'
+import { useStackApp, useUser } from "@stackframe/stack"
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -13,7 +13,25 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showEmailForm, setShowEmailForm] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const stackApp = useStackApp()
+  const user = useUser()
+
+  // Check for success message from registration
+  useEffect(() => {
+    const message = searchParams.get('message')
+    if (message) {
+      setSuccessMessage(message)
+    }
+  }, [searchParams])
+
+  // Redirect if already logged in
+  if (user) {
+    router.push('/dashboard')
+    return null
+  }
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -28,25 +46,29 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    console.log('Login form submitted', { email, password })
+    
     if (!validateForm()) return
     
     setIsLoading(true)
     setErrors({})
 
     try {
-      const result = await signIn.email({
+      console.log('Attempting to sign in with Stack')
+      const result = await stackApp.signInWithCredential({
         email,
         password,
-        fetchOptions: {
-          onSuccess: () => {
-            router.push('/dashboard')
-          },
-          onError: (ctx) => {
-            throw new Error(ctx.error.message || 'Failed to sign in')
-          },
-        },
       })
+      console.log('Sign in result:', result)
+      
+      if (result.status === 'ok') {
+        router.push('/dashboard')
+      } else {
+        // Handle error from Stack
+        setErrors({ general: result.error.message || 'Invalid email or password' })
+      }
     } catch (err: any) {
+      console.error('Sign in error:', err)
       setErrors({ general: err.message || 'Invalid email or password' })
     } finally {
       setIsLoading(false)
@@ -56,10 +78,7 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
     try {
-      await signIn.social({
-        provider: 'google',
-        callbackURL: '/dashboard',
-      })
+      await stackApp.signInWithOAuth('google')
     } catch (err: any) {
       setErrors({ general: 'Failed to sign in with Google' })
     } finally {
@@ -148,6 +167,11 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Success message */}
+              {successMessage && (
+                <div className="text-xs text-green-600 text-center bg-green-50 p-2 rounded-xl">{successMessage}</div>
+              )}
+
               {/* General error message */}
               {errors.general && (
                 <div className="text-xs text-red-500 text-center bg-red-50 p-2 rounded-xl">{errors.general}</div>

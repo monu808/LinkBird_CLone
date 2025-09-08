@@ -1,54 +1,50 @@
-import { pgTable, serial, text, timestamp, boolean, integer, varchar } from 'drizzle-orm/pg-core'
+import { pgTable, serial, text, timestamp, boolean, integer, varchar, primaryKey } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
+import type { AdapterAccount } from "@auth/core/adapters"
 
-// Users table (Better Auth compatible)
+// NextAuth.js Users table
 export const users = pgTable('user', {
-  id: text('id').primaryKey(),
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text('name'),
   email: text('email').unique().notNull(),
-  emailVerified: boolean('emailVerified').default(false),
+  emailVerified: timestamp('emailVerified', { mode: 'date' }),
   image: text('image'),
   createdAt: timestamp('createdAt').defaultNow(),
   updatedAt: timestamp('updatedAt').defaultNow(),
 })
 
-// Sessions table (Better Auth)
-export const sessions = pgTable('session', {
-  id: text('id').primaryKey(),
-  userId: text('userId').notNull(),
-  expiresAt: timestamp('expiresAt').notNull(),
-  ipAddress: text('ipAddress'),
-  userAgent: text('userAgent'),
-  createdAt: timestamp('createdAt').defaultNow(),
-  updatedAt: timestamp('updatedAt').defaultNow(),
-})
-
-// Accounts table (Better Auth - for OAuth providers)
+// NextAuth.js Accounts table
 export const accounts = pgTable('account', {
-  id: text('id').primaryKey(),
   userId: text('userId').notNull(),
-  accountId: text('accountId').notNull(),
-  providerId: text('providerId').notNull(),
-  accessToken: text('accessToken'),
-  refreshToken: text('refreshToken'),
-  idToken: text('idToken'),
-  accessTokenExpiresAt: timestamp('accessTokenExpiresAt'),
-  refreshTokenExpiresAt: timestamp('refreshTokenExpiresAt'),
+  type: text('type').$type<AdapterAccount['type']>().notNull(),
+  provider: text('provider').notNull(),
+  providerAccountId: text('providerAccountId').notNull(),
+  refresh_token: text('refresh_token'),
+  access_token: text('access_token'),
+  expires_at: integer('expires_at'),
+  token_type: text('token_type'),
   scope: text('scope'),
-  password: text('password'),
-  createdAt: timestamp('createdAt').defaultNow(),
-  updatedAt: timestamp('updatedAt').defaultNow(),
+  id_token: text('id_token'),
+  session_state: text('session_state'),
+}, (account) => ({
+  compoundKey: primaryKey({ columns: [account.provider, account.providerAccountId] })
+}))
+
+// NextAuth.js Sessions table
+export const sessions = pgTable('session', {
+  sessionToken: text('sessionToken').primaryKey(),
+  userId: text('userId').notNull(),
+  expires: timestamp('expires', { mode: 'date' }).notNull(),
 })
 
-// Verification table (Better Auth - for email verification)
-export const verifications = pgTable('verification', {
-  id: text('id').primaryKey(),
+// NextAuth.js Verification tokens table
+export const verificationTokens = pgTable('verificationToken', {
   identifier: text('identifier').notNull(),
-  value: text('value').notNull(),
-  expiresAt: timestamp('expiresAt').notNull(),
-  createdAt: timestamp('createdAt').defaultNow(),
-  updatedAt: timestamp('updatedAt').defaultNow(),
-})
+  token: text('token').notNull(),
+  expires: timestamp('expires', { mode: 'date' }).notNull(),
+}, (vt) => ({
+  compoundKey: primaryKey({ columns: [vt.identifier, vt.token] })
+}))
 
 // Campaigns table
 export const campaigns = pgTable('campaigns', {

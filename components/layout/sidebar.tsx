@@ -22,7 +22,7 @@ import {
   Activity,
   FileText,
 } from 'lucide-react'
-import { signOut, useSession } from '@/lib/auth-client'
+import { useStackApp, useUser } from '@stackframe/stack'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -49,16 +49,12 @@ export default function Sidebar({ children }: SidebarProps) {
   const pathname = usePathname()
   const { sidebarCollapsed, setSidebarCollapsed } = useAppStore()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { data: session } = useSession()
+  const stackApp = useStackApp()
+  const user = useUser()
 
-  const handleSignOut = async () => {
-    await signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          window.location.href = '/login'
-        },
-      },
-    })
+  const handleSignOut = () => {
+    // Use window.location to redirect to Stack auth logout
+    window.location.href = '/handler/sign-out'
   }
 
   return (
@@ -233,10 +229,10 @@ export default function Sidebar({ children }: SidebarProps) {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                {session?.user?.image ? (
+                {user?.profileImageUrl ? (
                   <img 
-                    src={session.user.image} 
-                    alt={session.user.name || 'User'} 
+                    src={user.profileImageUrl} 
+                    alt={user.displayName || 'User'} 
                     className="w-8 h-8 rounded-full"
                   />
                 ) : (
@@ -247,7 +243,7 @@ export default function Sidebar({ children }: SidebarProps) {
             {!sidebarCollapsed && (
               <div className="ml-3 flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {session?.user?.name || session?.user?.email || 'User'}
+                  {user?.displayName || user?.primaryEmail || 'User'}
                 </p>
                 <button
                   onClick={handleSignOut}

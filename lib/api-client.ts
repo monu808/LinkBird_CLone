@@ -1,4 +1,3 @@
-import { authClient } from '@/lib/auth-client'
 import type {
   Lead,
   Campaign,
