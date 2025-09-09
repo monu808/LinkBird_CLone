@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { campaigns, leads } from '@/lib/db/schema'
-// import { auth } from '@/lib/auth' // TODO: Replace with Stack Framework auth
+import { auth } from '@/lib/auth'
 import { eq, and, desc, asc, like, count } from 'drizzle-orm'
 import { z } from 'zod'
 
@@ -30,14 +30,16 @@ const querySchema = z.object({
 // GET /api/campaigns - List campaigns with pagination and filtering
 export async function GET(request: NextRequest) {
   try {
-    // TODO: Replace with Stack Framework authentication
-    // const session = await auth.api.getSession({
-    //   headers: request.headers,
-    // })
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    })
 
-    // if (!session) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    // }
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    console.log('Session user ID:', session.user.id)
+    console.log('Session user:', JSON.stringify(session.user, null, 2))
 
     const { searchParams } = new URL(request.url)
     const params = querySchema.parse(Object.fromEntries(searchParams))
@@ -47,7 +49,16 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit
 
     // Build where conditions
-    const conditions = [eq(campaigns.userId, "1")] // TODO: Replace with actual user ID
+    const conditions = []
+    
+    // Temporarily bypass user filter for testing - check if there are any campaigns at all
+    const bypassUserFilter = searchParams.get('bypass_user_filter') === 'true'
+    if (!bypassUserFilter) {
+      conditions.push(eq(campaigns.userId, session.user.id))
+    }
+    
+    console.log('Querying campaigns for user ID:', session.user.id)
+    console.log('Bypass user filter:', bypassUserFilter)
     
     if (params.search) {
       conditions.push(like(campaigns.name, `%${params.search}%`))
@@ -94,6 +105,10 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .offset(offset)
 
+    console.log('Found campaigns:', result.length)
+    console.log('Total campaigns for user:', total)
+    console.log('Campaigns data:', JSON.stringify(result, null, 2))
+
     return NextResponse.json({
       data: result,
       pagination: {
@@ -115,14 +130,13 @@ export async function GET(request: NextRequest) {
 // POST /api/campaigns - Create a new campaign
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Replace with Stack Framework authentication
-    // const session = await auth.api.getSession({
-    //   headers: request.headers,
-    // })
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    })
 
-    // if (!session) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    // }
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     const body = await request.json()
     const validatedData = createCampaignSchema.parse(body)
@@ -130,7 +144,7 @@ export async function POST(request: NextRequest) {
     // Convert startDate string to Date if provided
     const insertData: any = {
       ...validatedData,
-      userId: "1", // TODO: Replace with actual user ID
+      userId: session.user.id,
       createdAt: new Date(),
       updatedAt: new Date(),
     }

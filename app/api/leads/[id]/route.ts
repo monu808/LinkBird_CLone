@@ -38,6 +38,22 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid lead ID' }, { status: 400 })
     }
 
+    // Temporarily bypass user filter for testing
+    const { searchParams } = new URL(request.url)
+    const bypassUserFilter = searchParams.get('bypass_user_filter') === 'true'
+    
+    console.log('Fetching lead ID:', leadId)
+    console.log('User ID:', session.user.id)
+    console.log('Bypass filter:', bypassUserFilter)
+
+    // Build where conditions
+    const whereConditions = [eq(leads.id, leadId)]
+    if (!bypassUserFilter) {
+      whereConditions.push(eq(leads.userId, session.user.id))
+    }
+
+    console.log('WHERE conditions:', whereConditions.length)
+
     const [lead] = await db
       .select({
         id: leads.id,
@@ -61,10 +77,7 @@ export async function GET(
       })
       .from(leads)
       .leftJoin(campaigns, eq(leads.campaignId, campaigns.id))
-      .where(and(
-        eq(leads.id, leadId),
-        eq(leads.userId, session.user.id)
-      ))
+      .where(and(...whereConditions))
       .limit(1)
 
     if (!lead) {

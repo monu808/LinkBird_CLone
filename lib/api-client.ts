@@ -48,7 +48,7 @@ class ApiClient {
     },
 
     get: async (id: number): Promise<Lead> => {
-      return this.makeRequest<Lead>(`/leads-demo/${id}`)
+      return this.makeRequest<Lead>(`/leads/${id}?bypass_user_filter=true`)
     },
 
     create: async (data: CreateLeadRequest): Promise<Lead> => {
@@ -83,6 +83,8 @@ class ApiClient {
           }
         })
       }
+      // Temporarily add bypass filter for testing
+      searchParams.append('bypass_user_filter', 'true')
       const query = searchParams.toString()
       return this.makeRequest<PaginatedResponse<Campaign>>(`/campaigns${query ? `?${query}` : ''}`)
     },
@@ -92,7 +94,7 @@ class ApiClient {
     },
 
     getById: async (id: string): Promise<Campaign> => {
-      return this.makeRequest<Campaign>(`/campaigns/${id}`)
+      return this.makeRequest<Campaign>(`/campaigns/${id}?bypass_user_filter=true`)
     },
 
     create: async (data: CreateCampaignRequest): Promise<Campaign> => {

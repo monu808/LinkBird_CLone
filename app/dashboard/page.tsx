@@ -1,5 +1,7 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,38 +16,6 @@ import {
   Clock,
   Eye
 } from 'lucide-react'
-
-// Mock campaigns data
-const mockCampaigns = [
-  {
-    id: 1,
-    name: 'Product Manager Outreach Q4',
-    leads: 245,
-    sent: 189,
-    status: 'active'
-  },
-  {
-    id: 2,
-    name: 'Engineering Leaders Campaign',
-    leads: 180,
-    sent: 134,
-    status: 'active'
-  },
-  {
-    id: 3,
-    name: 'Startup Founders Network',
-    leads: 85,
-    sent: 85,
-    status: 'inactive'
-  },
-  {
-    id: 4,
-    name: 'Sales Leaders Q1',
-    leads: 0,
-    sent: 0,
-    status: 'draft'
-  }
-]
 
 // Mock data for recent activity
 const mockActivity = [
@@ -88,6 +58,14 @@ const mockActivity = [
 ]
 
 export default function DashboardPage() {
+  // Fetch campaigns from API
+  const { data: campaignsResponse, isLoading: campaignsLoading, error: campaignsError } = useQuery({
+    queryKey: ['campaigns'],
+    queryFn: () => apiClient.campaigns.list({ page: 1, limit: 10 }),
+  })
+
+  const campaigns = campaignsResponse?.data || []
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -202,26 +180,43 @@ export default function DashboardPage() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {mockCampaigns.map((campaign) => (
-              <div key={campaign.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                    <Megaphone className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{campaign.name}</p>
-                    <p className="text-sm text-gray-500">{campaign.leads} leads • {campaign.sent} sent</p>
-                  </div>
+          <CardContent>
+            <div className="h-[calc(100vh-350px)] overflow-auto rounded-md space-y-4" aria-label="Active campaigns container">
+              {campaignsLoading ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">Loading campaigns...</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  {getStatusBadge(campaign.status)}
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+              ) : campaignsError ? (
+                <div className="text-center py-4">
+                  <p className="text-red-500">Error loading campaigns: {campaignsError.message}</p>
                 </div>
-              </div>
-            ))}
+              ) : campaigns.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-gray-500">No campaigns found</p>
+                </div>
+              ) : (
+                campaigns.map((campaign) => (
+                  <div key={campaign.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <Megaphone className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{campaign.name}</p>
+                        <p className="text-sm text-gray-500">{campaign.totalLeads || 0} leads • {campaign.stats?.contacted || 0} sent</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {getStatusBadge(campaign.status)}
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -235,29 +230,31 @@ export default function DashboardPage() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {mockActivity.map((activity) => (
-              <div key={activity.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium ${getAvatarColor(activity.name)}`}>
-                    {activity.avatar}
+          <CardContent>
+            <div className="h-[calc(100vh-350px)] overflow-auto rounded-md space-y-4" aria-label="Recent activity container">
+              {mockActivity.map((activity) => (
+                <div key={activity.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium ${getAvatarColor(activity.name)}`}>
+                      {activity.avatar}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{activity.name}</p>
+                      <p className="text-sm text-gray-500">{activity.campaign}</p>
+                      <p className="text-xs text-gray-400">{activity.time}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{activity.name}</p>
-                    <p className="text-sm text-gray-500">{activity.campaign}</p>
-                    <p className="text-xs text-gray-400">{activity.time}</p>
+                  <div className="flex items-center gap-2">
+                    {getActivityStatusBadge(activity.status, activity.statusType)}
+                    <div className="flex items-center">
+                      {activity.statusType === 'success' && <Check className="h-4 w-4 text-green-500" />}
+                      {activity.statusType === 'replied' && <Eye className="h-4 w-4 text-blue-500" />}
+                      {activity.statusType === 'pending' && <Clock className="h-4 w-4 text-purple-500" />}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {getActivityStatusBadge(activity.status, activity.statusType)}
-                  <div className="flex items-center">
-                    {activity.statusType === 'success' && <Check className="h-4 w-4 text-green-500" />}
-                    {activity.statusType === 'replied' && <Eye className="h-4 w-4 text-blue-500" />}
-                    {activity.statusType === 'pending' && <Clock className="h-4 w-4 text-purple-500" />}
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

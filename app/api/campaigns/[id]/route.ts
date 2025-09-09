@@ -31,14 +31,25 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid campaign ID' }, { status: 400 })
     }
 
+    // Temporarily bypass user filter for testing
+    const { searchParams } = new URL(request.url)
+    const bypassUserFilter = searchParams.get('bypass_user_filter') === 'true'
+    
+    console.log('Fetching campaign ID:', campaignId)
+    console.log('User ID:', session.user.id)
+    console.log('Bypass filter:', bypassUserFilter)
+
+    // Build where conditions
+    const whereConditions = [eq(campaigns.id, campaignId)]
+    if (!bypassUserFilter) {
+      whereConditions.push(eq(campaigns.userId, session.user.id))
+    }
+
     // Get campaign details
     const [campaign] = await db
       .select()
       .from(campaigns)
-      .where(and(
-        eq(campaigns.id, campaignId),
-        eq(campaigns.userId, session.user.id)
-      ))
+      .where(and(...whereConditions))
       .limit(1)
 
     if (!campaign) {

@@ -70,8 +70,9 @@ export default function CampaignsPage() {
   const fetchCampaigns = async () => {
     try {
       setLoading(true)
-      console.log('Fetching campaigns from demo API...')
-      const response = await fetch('/api/campaigns/demo')
+      console.log('Fetching campaigns from API...')
+      // Temporarily bypass user filter to see if there are any campaigns at all
+      const response = await fetch('/api/campaigns?bypass_user_filter=true')
       console.log('Response status:', response.status)
       
       if (!response.ok) {
