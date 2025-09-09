@@ -102,29 +102,29 @@ export default function CampaignDetailsPage() {
                   <Users className="h-6 w-6 text-blue-500 mr-2" />
                   <span className="text-sm font-medium text-gray-600">Total Leads</span>
                 </div>
-                <div className="text-3xl font-bold text-gray-900">{campaign.totalLeads || 20}</div>
+                <div className="text-3xl font-bold text-gray-900">{campaign.stats?.total || 0}</div>
               </div>
               
               <div className="bg-gray-50 rounded-lg p-6 text-center">
                 <div className="flex items-center justify-center mb-3">
                   <Mail className="h-6 w-6 text-blue-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-600">Request Sent</span>
+                  <span className="text-sm font-medium text-gray-600">Contacted</span>
                 </div>
                 <div className="text-3xl font-bold text-gray-900">{campaign.stats?.contacted || 0}</div>
               </div>
               
               <div className="bg-gray-50 rounded-lg p-6 text-center">
                 <div className="flex items-center justify-center mb-3">
-                  <CheckCircle className="h-6 w-6 text-blue-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-600">Request Accepted</span>
+                  <CheckCircle className="h-6 w-6 text-green-500 mr-2" />
+                  <span className="text-sm font-medium text-gray-600">Converted</span>
                 </div>
                 <div className="text-3xl font-bold text-gray-900">{campaign.stats?.converted || 0}</div>
               </div>
               
               <div className="bg-gray-50 rounded-lg p-6 text-center">
                 <div className="flex items-center justify-center mb-3">
-                  <MessageSquare className="h-6 w-6 text-blue-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-600">Request Replied</span>
+                  <MessageSquare className="h-6 w-6 text-purple-500 mr-2" />
+                  <span className="text-sm font-medium text-gray-600">Replies</span>
                 </div>
                 <div className="text-3xl font-bold text-gray-900">{campaign.stats?.responded || 0}</div>
               </div>

@@ -210,40 +210,7 @@ export default function CampaignDetailsPage() {
           </Badge>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-blue-50 rounded-md p-4 text-center">
-            <div className="flex items-center justify-center mb-2">
-              <Users className="h-5 w-5 text-blue-500 mr-2" />
-              <span className="text-xs font-medium text-gray-600">Total Leads</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-900">{campaign.totalLeads}</div>
-          </div>
-          
-          <div className="bg-gray-50 rounded-md p-4 text-center">
-            <div className="flex items-center justify-center mb-2">
-              <Mail className="h-5 w-5 text-blue-500 mr-2" />
-              <span className="text-xs font-medium text-gray-600">Contacted</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-900">{campaign.stats?.contacted || 0}</div>
-          </div>
-          
-          <div className="bg-gray-50 rounded-md p-4 text-center">
-            <div className="flex items-center justify-center mb-2">
-              <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-              <span className="text-xs font-medium text-gray-600">Converted</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-900">{campaign.stats?.converted || 0}</div>
-          </div>
-          
-          <div className="bg-gray-50 rounded-md p-4 text-center">
-            <div className="flex items-center justify-center mb-2">
-              <MessageSquare className="h-5 w-5 text-purple-500 mr-2" />
-              <span className="text-xs font-medium text-gray-600">Replies</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-900">{campaign.stats?.responded || 0}</div>
-          </div>
-        </div>
+        
 
         {/* Segmented Tabs */}
         <div className="mt-4">
@@ -275,16 +242,6 @@ export default function CampaignDetailsPage() {
               <h3 className="text-lg font-semibold text-gray-900">Campaign Overview</h3>
               <p className="text-sm text-gray-600">Campaign performance and analytics</p>
             </div>
-          </div>
-        )}
-
-        {activeTab === 'leads' && (
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Campaign Leads</h3>
-              <p className="text-sm text-gray-600">Total leads: {campaign.totalLeads}</p>
-            </div>
-            <Button>Save</Button>
           </div>
         )}
 
